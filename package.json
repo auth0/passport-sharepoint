@@ -11,19 +11,40 @@
     "email": "thomas.herbst@queport.com"
   },
   "dependencies": {
-    "pkginfo": "0.2.x",
-    "passport-oauth": "1.x.x",
+    "jwt-simple": "^0.3.0",
     "oauth": "0.9.x",
-    "jwt-simple": "0.1.x"
+    "passport": "^0.3.2",
+    "passport-oauth": "1.x.x",
+    "pkginfo": "0.2.x"
+  },
+  "scripts": {
+    "test": "node_modules/.bin/mocha --require test/bootstrap/node test/*.test.js"
   },
   "repository": {
     "type": "git",
     "url": "http://github.com/QuePort/passport-sharepoint.git"
   },
-  "engines": { "node": ">= 0.4.0" },
-  "licenses": [ {
-    "type": "MIT",
-    "url": "http://www.opensource.org/licenses/MIT" 
-  } ],
-  "keywords": ["passport", "oauth", "auth", "authn", "authentication", "sharepoint", "sp2013"]
+  "engines": {
+    "node": ">= 0.4.0"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://www.opensource.org/licenses/MIT"
+    }
+  ],
+  "keywords": [
+    "passport",
+    "oauth",
+    "auth",
+    "authn",
+    "authentication",
+    "sharepoint",
+    "sp2013"
+  ],
+  "devDependencies": {
+    "chai": "^4.0.2",
+    "chai-passport-strategy": "^1.0.0",
+    "mocha": "^3.4.2"
+  }
 }
