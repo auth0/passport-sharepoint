@@ -2,8 +2,8 @@
 /* jshint expr: true */
 
 var chai = require('chai')
+  , jwt = require('jwt-simple')
   , SharepointStrategy = require('../lib/passport-sharepoint').Strategy;
-
 
 describe('Strategy', function() {
     
@@ -75,7 +75,39 @@ describe('Strategy', function() {
     });
   });
 
-  describe('authorization request with a malformed spAccessToken', function() {
+  describe('authorization request with a malformed SPAppToken', function() {
+    var callbackURL = 'htto://foo.com';
+    var spSiteUrl = 'http://www.sharepoint.com';
+    var strategy = new SharepointStrategy({
+        appId: 'ABC123',
+        appSecret: 'secret',
+        callbackURL: callbackURL,
+        spSiteUrl: spSiteUrl
+      }, function() {});
+
+
+    var err;
+
+    before(function(done) {
+      chai.passport.use(strategy)
+        .error(function(e) {
+          err = e;
+          done();
+        })
+        .req(function(req) {
+          req.body = req.body || {};
+          req.body.SPAppToken = 'foo';
+        })
+        .authenticate();
+    });
+
+    it('should error', function() {
+      expect(err.constructor.name).to.equal('Error');
+      expect(err.message).to.equal('Not enough or too many segments');
+    });
+  });
+
+  describe('authorization request with a SPAppToken with invalid algorithm', function() {
     var callbackURL = 'htto://foo.com';
     var spSiteUrl = 'http://www.sharepoint.com';
     var strategy = new SharepointStrategy({
@@ -102,12 +134,12 @@ describe('Strategy', function() {
     });
 
     it('should error', function() {
-      expect(err.constructor.name).to.equal('TypeError');
-      expect(err.message).to.equal('Cannot read property \'split\' of undefined');
+      expect(err.constructor.name).to.equal('Error');
+      expect(err.message).to.equal('Algorithm not supported');
     });
   });
 
-  describe('error caused by token endpoint', function() {
+  describe('authorization request with an invalid SPAppToken', function() {
     var callbackURL = 'htto://foo.com';
     var spSiteUrl = 'http://www.sharepoint.com';
     var strategy = new SharepointStrategy({
@@ -121,6 +153,22 @@ describe('Strategy', function() {
     var err;
 
     before(function(done) {
+      // Sample token taken from https://blogs.msdn.microsoft.com/kaevans/2013/04/05/inside-sharepoint-2013-oauth-context-tokens/
+      const sampleToken = {
+        "aud": "4c2df2aa-3d14-4d84-8a79-5a75135e98d0/localhost:44346@d341a536-1d82-4267-87e6-e2dfff4fa325",
+        "iss": "00000001-0000-0000-c000-000000000000@d341a536-1d82-4267-87e6-e2dfff4fa325",
+        "nbf": 1365177964,
+        "exp": 1497964102,
+        "appctxsender": "00000003-0000-0ff1-ce00-000000000000@d341a536-1d82-4267-87e6-e2dfff4fa325",
+        "appctx": "{\"CacheKey\":\"em1/saZohTOS4nOUZHXMb8QJgyNbkEO86TSe5j9WYmo=\",\"SecurityTokenServiceUri\":\"https://accounts.accesscontrol.windows.net/tokens/OAuth/2\"}",
+        "refreshtoken": "IAAAANc8bAVMWZceOsdfgsdfggbfm7oU_aM7D2qofUpQstMsdfgsdfgfYS0OtbZ-eY9UQGvlYSl5kpPi913G1AwIVBMxoCux8-bhcCCiaGVo-vuFzrXetdhRGPftQdHh-1rS5cvDuuQ_bw_mjySIyuHNGSavEs8HUgHY9BOVc3pTGZtZ_nS-1NbDLYObjnznasdfasdfasdfQreLAeeOpVRY1PGsdfgsdfgOITA3BKhjJFz_40YJMubdHmY2OTSnqwNnUe-rBBCtfvKt4xFWvdRzTzwfW",
+        "isbrowserhostedapp": "true",
+        "jti": "59da040f-46f2-4dc1-90ab-1b1af906db0d",
+        "iat": 1497960502
+      };
+
+      const SPAppToken = jwt.encode(sampleToken, 'bad-secret');
+
       chai.passport.use(strategy)
         .error(function(e) {
           err = e;
@@ -128,8 +176,55 @@ describe('Strategy', function() {
         })
         .req(function(req) {
           req.body = req.body || {};
+          req.body.SPAppToken = SPAppToken;
+        })
+        .authenticate();
+    });
+
+    it('should error', function() {
+      expect(err.constructor.name).to.equal('Error');
+      expect(err.message).to.equal('Signature verification failed');
+    });
+  });
+
+  describe('error caused by token endpoint', function() {
+    var callbackURL = 'htto://foo.com';
+    var spSiteUrl = 'http://www.sharepoint.com';
+    var strategy = new SharepointStrategy({
+        appId: 'ABC123',
+        appSecret: 'secret',
+        callbackURL: callbackURL,
+        spSiteUrl: spSiteUrl
+      }, function() {});
+
+
+    var err;
+
+    before(function(done) {
           // Sample token taken from https://blogs.msdn.microsoft.com/kaevans/2013/04/05/inside-sharepoint-2013-oauth-context-tokens/
-          req.body.SPAppToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YzJkZjJhYS0zZDE0LTRkODQtOGE3OS01YTc1MTM1ZTk4ZDAvbG9jYWxob3N0OjQ0MzQ2QGQzNDFhNTM2LTFkODItNDI2Ny04N2U2LWUyZGZmZjRmYTMyNSIsImlzcyI6IjAwMDAwMDAxLTAwMDAtMDAwMC1jMDAwLTAwMDAwMDAwMDAwMEBkMzQxYTUzNi0xZDgyLTQyNjctODdlNi1lMmRmZmY0ZmEzMjUiLCJuYmYiOjEzNjUxNzc5NjQsImV4cCI6MTQ5Nzk2NDEwMiwiYXBwY3R4c2VuZGVyIjoiMDAwMDAwMDMtMDAwMC0wZmYxLWNlMDAtMDAwMDAwMDAwMDAwQGQzNDFhNTM2LTFkODItNDI2Ny04N2U2LWUyZGZmZjRmYTMyNSIsImFwcGN0eCI6IntcIkNhY2hlS2V5XCI6XCJlbTEvc2Fab2hUT1M0bk9VWkhYTWI4UUpneU5ia0VPODZUU2U1ajlXWW1vPVwiLFwiU2VjdXJpdHlUb2tlblNlcnZpY2VVcmlcIjpcImh0dHBzOi8vYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldC90b2tlbnMvT0F1dGgvMlwifSIsInJlZnJlc2h0b2tlbiI6IklBQUFBTmM4YkFWTVdaY2VPc2RmZ3NkZmdnYmZtN29VX2FNN0QycW9mVXBRc3RNc2RmZ3NkZmdmWVMwT3RiWi1lWTlVUUd2bFlTbDVrcFBpOTEzRzFBd0lWQk14b0N1eDgtYmhjQ0NpYUdWby12dUZ6clhldGRoUkdQZnRRZEhoLTFyUzVjdkR1dVFfYndfbWp5U0l5dUhOR1NhdkVzOEhVZ0hZOUJPVmMzcFRHWnRaX25TLTFOYkRMWU9iam56bmFzZGZhc2RmYXNkZlFyZUxBZWVPcFZSWTFQR3NkZmdzZGZnT0lUQTNCS2hqSkZ6XzQwWUpNdWJkSG1ZMk9UU25xd05uVWUtckJCQ3Rmdkt0NHhGV3ZkUnpUendmVyIsImlzYnJvd3Nlcmhvc3RlZGFwcCI6InRydWUiLCJqdGkiOiI1OWRhMDQwZi00NmYyLTRkYzEtOTBhYi0xYjFhZjkwNmRiMGQiLCJpYXQiOjE0OTc5NjA1MDJ9.LNMEarfSOn9oSpWBL44QKwbSPMx1CAFhSJ00a72IoNE'; 
+      const sampleToken = {
+        "aud": "4c2df2aa-3d14-4d84-8a79-5a75135e98d0/localhost:44346@d341a536-1d82-4267-87e6-e2dfff4fa325",
+        "iss": "00000001-0000-0000-c000-000000000000@d341a536-1d82-4267-87e6-e2dfff4fa325",
+        "nbf": 1365177964,
+        "exp": 1497964102,
+        "appctxsender": "00000003-0000-0ff1-ce00-000000000000@d341a536-1d82-4267-87e6-e2dfff4fa325",
+        "appctx": "{\"CacheKey\":\"em1/saZohTOS4nOUZHXMb8QJgyNbkEO86TSe5j9WYmo=\",\"SecurityTokenServiceUri\":\"https://accounts.accesscontrol.windows.net/tokens/OAuth/2\"}",
+        "refreshtoken": "IAAAANc8bAVMWZceOsdfgsdfggbfm7oU_aM7D2qofUpQstMsdfgsdfgfYS0OtbZ-eY9UQGvlYSl5kpPi913G1AwIVBMxoCux8-bhcCCiaGVo-vuFzrXetdhRGPftQdHh-1rS5cvDuuQ_bw_mjySIyuHNGSavEs8HUgHY9BOVc3pTGZtZ_nS-1NbDLYObjnznasdfasdfasdfQreLAeeOpVRY1PGsdfgsdfgOITA3BKhjJFz_40YJMubdHmY2OTSnqwNnUe-rBBCtfvKt4xFWvdRzTzwfW",
+        "isbrowserhostedapp": "true",
+        "jti": "59da040f-46f2-4dc1-90ab-1b1af906db0d",
+        "iat": 1497960502
+      };
+
+      const SPAppToken = jwt.encode(sampleToken, 'secret');
+
+      chai.passport.use(strategy)
+        .error(function(e) {
+          err = e;
+          done();
+        })
+        .req(function(req) {
+          req.body = req.body || {};
+          req.body.SPAppToken = SPAppToken;
         })
         .authenticate();
     });

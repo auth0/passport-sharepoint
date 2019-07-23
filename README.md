@@ -9,6 +9,10 @@ By plugging into Passport, SharePoint authentication can be easily and unobtrusi
 
     $ npm install passport-sharepoint
 
+## Breaking change
+
+Version 0.4.0 and higher will validate the `SPAppToken` as [recommended by Microsoft](https://docs.microsoft.com/en-us/sharepoint/dev/sp-add-ins/context-token-oauth-flow-for-sharepoint-add-ins#context-token-flow-steps). Tokens using a `none` algorithm, not signed with the `appSecret`, or expired, will be rejected.
+
 ## Usage
 
 #### Configure Strategy
