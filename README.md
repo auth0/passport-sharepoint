@@ -1,72 +1,8 @@
-# Passport-SharePoint
+# DEPRECATED
 
-[Passport](http://passportjs.org/) strategy for authenticating with [SharePoint 2013](http://sharepoint.microsoft.com/.com/) OnPremise and O365 using the OAuth 2.0 API.
+This package is deprecated and not maintained by Auth0. The original package, can be found at https://github.com/QuePort/passport-sharepoint.
 
-This module lets you authenticate using SharePoint 2013 OnPremise or O365 in your Node.js applications.
-By plugging into Passport, SharePoint authentication can be easily and unobtrusively integrated into any application or framework that supports [Connect](http://www.senchalabs.org/connect/)-style middleware, including [Express](http://expressjs.com/).
-
-## Installation
-
-    $ npm install passport-sharepoint
-
-## Breaking change
-
-Version 0.4.0 and higher will validate the `SPAppToken` as [recommended by Microsoft](https://docs.microsoft.com/en-us/sharepoint/dev/sp-add-ins/context-token-oauth-flow-for-sharepoint-add-ins#context-token-flow-steps). Tokens using a `none` algorithm, not signed with the `appSecret`, or expired, will be rejected.
-
-## Usage
-
-#### Configure Strategy
-
-The SharePoint authentication strategy authenticates users using a SharePoint 2013 OnPremise or O365
-account using OAuth 2.0.  The strategy requires a `verify` callback, which
-accepts these credentials and calls `done` providing a user, as well as
-`options` specifying a app ID, app secret, and callback URL.
-
-    passport.use(new SharePointStrategy({
-        appId: SHAREPOINT_APP_ID ,
-        appSecret: SHAREPOINT_APP_SECRET ,
-        callbackURL: "http://localhost:3000/auth/sharepoint/callback"
-      },
-      function(accessToken, refreshToken, profile, done) {
-        User.findOrCreate({ userID: profile.id }, function (err, user) {
-          return done(err, user);
-        });
-      }
-    ));
-    
-#### Configure SharePoint AppPart
-
-On the SharePoint side you need a provider hosted AppPart that talks to you Node.JS server and you must register your Node.JS server as a app.
-The AppPart you can simply create via the VS2012 AppPart wizard.
-These AppPart must define the `StandardTokens` as the url parameter so that the strategy can work.
-
-    <Content Type="html" Src="https://nodeserver:3000/auth/sharepoint?{StandardTokens}" />
-
-The Node.JS Server you can register as an app at
-`https://sharepoint/_layouts/15/AppRegNew.aspx`
-The app id and app secret you specify here is used in our strategy.
-
-#### Authenticate Requests
-
-Use `passport.authenticate()`, specifying the `'sharepoint'` strategy, to
-authenticate requests.
-
-For example, as route middleware in an [Express](http://expressjs.com/)
-application:
-
-    app.get('/auth/sharepoint',
-      passport.authenticate('sharepoint'),
-      function(req, res){
-        // The request will be redirected to SharePoint for authentication, so
-        // this function will not be called.
-      });
-
-    app.get('/auth/sharepoint/callback', 
-      passport.authenticate('sharepoint', { failureRedirect: '/login' }),
-      function(req, res) {
-        // Successful authentication, redirect home.
-        res.redirect('/');
-      });
+See versions.md for the latest changes.
 
 ## Credits
 
