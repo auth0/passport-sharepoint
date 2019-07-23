@@ -1,5 +1,9 @@
 # passport-sharepoint Versions
 
+## Version 0.4.0
+
+- Verify tokens using appSecret and check for token expiration
+- Update jwt-simple dependency
 
 ## Version 0.2.6
 
