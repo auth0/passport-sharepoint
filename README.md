@@ -2,7 +2,9 @@
 
 This package is deprecated and not maintained by Auth0. The original package, can be found at https://github.com/QuePort/passport-sharepoint.
 
-See versions.md for the latest changes.
+[SECURITY NOTICE](SECURITY-NOTICE.md)
+
+See [Versions](versions.md) for the latest changes.
 
 ## Credits
 
