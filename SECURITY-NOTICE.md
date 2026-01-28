@@ -16,11 +16,13 @@ useCase:
 
 **Published**: 7/23/2019
 
+**Updated**: 1/21/2026
+
 **CVE number**: CVE-2019-13483
 
 ## Overview
 
-All versions of [Passport-SharePoint](https://github.com/auth0/passport-sharepoint) lower than 0.4.0 do not validate the JWT signature of an access token before processing.
+All versions of [Passport-SharePoint](https://github.com/auth0/passport-sharepoint) lower than 0.4.0 (or `0.2.9-okta-0.4.0`) do not validate the JWT signature of an access token before processing.
 
 This vulnerability allows attackers to forge tokens and bypass authentication and authorization mechanisms.
 
@@ -28,12 +30,13 @@ This vulnerability allows attackers to forge tokens and bypass authentication an
 
 You are affected by this vulnerability if the following conditions apply:
 
-- You use a version of [Passport-SharePoint](https://github.com/auth0/passport-sharepoint) lower than 0.4.0
+- You use a version of [Passport-SharePoint](https://github.com/auth0/passport-sharepoint) lower than 0.4.0 or `0.2.9-okta-0.4.0`
 
 ## How to fix that?
 
-Developers using the [Passport-SharePoint](https://github.com/auth0/passport-sharepoint) library need to upgrade to the latest version `0.4.0`. Developers should plan to discontinue the use of this library as Auth0 has deprecated the library and it will no longer be maintained.
+Developers using the [Passport-SharePoint](https://github.com/auth0/passport-sharepoint) library need to upgrade to version `0.4.0` or `0.2.9-okta-0.4.0`. Developers should plan to discontinue the use of this library as Auth0 has deprecated the library and it will no longer be maintained.
 
+> **Note**: Version `0.2.9-okta-0.4.0` is functionally equivalent to `0.4.0`. The version was renamed for internal SCA compliance; no code changes.
 
 ### Will this update impact my users?
 

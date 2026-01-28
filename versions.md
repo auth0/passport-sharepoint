@@ -1,5 +1,8 @@
 # passport-sharepoint Versions
 
+## Version 0.2.9-okta-0.4.0
+- This release re-aligns the Auth0 fork of `passport-sharepoint` version to be renamed for internal SCA compliance; no code changes.
+
 ## Version 0.4.0
 
 - Verify tokens using appSecret and check for token expiration
